@@ -35,29 +35,15 @@ CREATE POLICY "Authenticated users can update their own profiles"
 
 ALTER PUBLICATION supabase_realtime ADD TABLE profiles;
 
--- Possible bug, cannot setup RLS to avoid unauthenticated users to receive and broadcast messages
-CREATE POLICY "authenticated can receive broadcast shootout"
+
+CREATE POLICY "authenticated can receive broadcast"
 ON "realtime"."messages"
 FOR SELECT
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1
-    FROM (SELECT realtime.topic() AS topic) AS subquery
-    WHERE subquery.topic = 'shootout'
-      AND realtime.messages.extension IN ('broadcast')
-  )
-);
+USING (TRUE);
 
-CREATE POLICY "authenticated can broadcast shootout"
+CREATE POLICY "authenticated can emit broadcast"
 ON "realtime"."messages"
 FOR INSERT
 TO authenticated
-WITH CHECK (
-  EXISTS (
-    SELECT 1
-    FROM (SELECT realtime.topic() AS topic) AS subquery
-    WHERE subquery.topic = 'shootout'
-      AND realtime.messages.extension IN ('broadcast')
-  )
-);
+WITH CHECK (TRUE);
